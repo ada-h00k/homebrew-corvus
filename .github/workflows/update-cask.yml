@@ -1,0 +1,101 @@
+yaml
+name: Update wren-swift Cask
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+
+      - name: Get latest GitHub release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          RELEASE=$(gh api \
+            repos/ada-h00k/wren/releases/latest)
+
+          TAG=$(jq -r '.tag_name' <<< "$RELEASE")
+          URL=$(jq -r '
+            .assets[]
+            | select(.name == "signal-cli-mac-macos-arm64.zip")
+            | .browser_download_url
+          ' <<< "$RELEASE")
+
+          if [[ -z "$TAG" || "$TAG" == "null" || -z "$URL" ]]; then
+            echo "Release tag or binary not found"
+            exit 1
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Download binary and calculate checksum
+        id: checksum
+        env:
+          DOWNLOAD_URL: ${{ steps.release.outputs.url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          curl -fL "$DOWNLOAD_URL" -o /tmp/signal-cli.zip
+          SHA=$(shasum -a 256 /tmp/signal-cli.zip | awk '{print $1}')
+
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Update Cask
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+          URL: ${{ steps.release.outputs.url }}
+          SHA: ${{ steps.checksum.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat > Casks/wren-swift.rb <<EOF
+          cask "wren-swift" do
+            version "${TAG}"
+            sha256 "${SHA}"
+
+            url "${URL}"
+
+            name "Wren Swift"
+            desc "Swift GUI for signal-cli"
+            homepage "https://github.com/ada-h00k/wren"
+
+            depends_on arch: :arm64
+
+            app "wren-swift.app"
+          end
+          EOF
+
+      - name: Commit changes if needed
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet -- Casks/wren-swift.rb; then
+            echo "Cask is already up to date"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add Casks/wren-swift.rb
+          git commit -m "Update wren-swift to ${{ steps.release.outputs.tag }}"
+          git push

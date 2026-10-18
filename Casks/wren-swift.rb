@@ -1,4 +1,4 @@
-```ruby
+ruby
 cask "wren-swift" do
     version "0.0.0"
 
@@ -17,4 +17,3 @@ cask "wren-swift" do
         strategy :github_latest
     end
 end
-```
