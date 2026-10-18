@@ -31,7 +31,7 @@ jobs:
           TAG=$(jq -r '.tag_name' <<< "$RELEASE")
           URL=$(jq -r '
             .assets[]
-            | select(.name == "signal-cli-mac-macos-arm64.zip")
+            | select(.name == "wren-mac-macos-arm64.zip")
             | .browser_download_url
           ' <<< "$RELEASE")
 

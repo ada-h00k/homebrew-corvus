@@ -1,9 +1,9 @@
 # Homebrew Tap — Wren
 
-Homebrew Cask for [signal-cli-Qt](https://github.com/ada-h00k/signal-cli-Qt).
+Homebrew Cask for [Wren](https://github.com/ada-h00k/Wren).
 
 ## Install
 
 ```bash
-brew tap <DEIN_GITHUB_USER>/signal-cli-qt
-brew install --cask signal-cli-qt
+brew tap ada-h00k/Wren
+brew install --cask wren-swift

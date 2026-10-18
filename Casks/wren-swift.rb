@@ -2,7 +2,7 @@ ruby
 cask "wren-swift" do
     version "0.0.0"
 
-    url "https://github.com/ada-h00k/signal-cli-Qt/releases/download/v#{version}/signal-cli-mac-macos-arm64.zip"
+    url "https://github.com/ada-h00k/signal-cli-Qt/releases/download/v#{version}/wren-macos-arm64.zip"
 
     name "Wren Swift"
     desc "Swift GUI for signal-cli"
