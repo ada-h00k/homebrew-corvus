@@ -1,19 +1,20 @@
-ruby
 cask "wren-swift" do
-    version "0.0.0"
+  version "0"
 
-    url "https://github.com/ada-h00k/signal-cli-Qt/releases/download/v#{version}/wren-macos-arm64.zip"
+  url "https://github.com/ada-h00k/Wren/releases/latest/download/wren-macos-arm64.zip"
+  name "Wren"
+  desc "Native macOS GUI for signal-cli with encrypted local chat history"
+  homepage "https://github.com/ada-h00k/Wren"
 
-    name "Wren Swift"
-    desc "Swift GUI for signal-cli"
-    homepage "https://github.com/ada-h00k/wren"
+  livecheck do
+    url :url
+    strategy :header_match
+  end
 
-    depends_on arch: :arm64
+  depends_on arch: :arm64
+  depends_on macos: ">= :sonoma"
 
-    app "wren-swift.app"
+  auto_updates true
 
-    livecheck do
-        url "https://github.com/ada-h00k/wren"
-        strategy :github_latest
-    end
+  app "Wren.app"
 end
