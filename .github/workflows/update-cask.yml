@@ -1,4 +1,4 @@
-name: Update wren-swift Cask
+name: Update Wren Cask
 
 on:
   schedule:
@@ -10,13 +10,13 @@ permissions:
 
 jobs:
   update:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout tap
         uses: actions/checkout@v4
 
-      - name: Get latest GitHub release
+      - name: Get latest release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -24,25 +24,28 @@ jobs:
         run: |
           set -euo pipefail
 
-          RELEASE=$(gh api \
-            repos/ada-h00k/wren/releases/latest)
-
-          TAG=$(jq -r '.tag_name' <<< "$RELEASE")
-          URL=$(jq -r '
+          RELEASE="$(gh api repos/ada-h00k/Wren/releases/latest)"
+          TAG="$(jq -r '.tag_name' <<< "$RELEASE")"
+          URL="$(jq -r '
             .assets[]
-            | select(.name == "wren-mac-macos-arm64.zip")
+            | select(.name == "wren-macos-arm64.zip")
             | .browser_download_url
-          ' <<< "$RELEASE")
+          ' <<< "$RELEASE")"
 
-          if [[ -z "$TAG" || "$TAG" == "null" || -z "$URL" ]]; then
-            echo "Release tag or binary not found"
+          if [[ -z "$TAG" || "$TAG" == "null" ]]; then
+            echo "::error::No latest release tag found"
+            exit 1
+          fi
+
+          if [[ -z "$URL" || "$URL" == "null" ]]; then
+            echo "::error::macOS ARM64 asset not found"
             exit 1
           fi
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
-      - name: Download binary and calculate checksum
+      - name: Download and verify checksum
         id: checksum
         env:
           DOWNLOAD_URL: ${{ steps.release.outputs.url }}
@@ -50,9 +53,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          curl -fL "$DOWNLOAD_URL" -o /tmp/signal-cli.zip
-          SHA=$(shasum -a 256 /tmp/signal-cli.zip | awk '{print $1}')
+          curl --fail --location --silent --show-error \
+            "$DOWNLOAD_URL" -o "$RUNNER_TEMP/wren.zip"
 
+          SHA="$(shasum -a 256 "$RUNNER_TEMP/wren.zip" | awk '{print $1}')"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
       - name: Update Cask
@@ -70,14 +74,14 @@ jobs:
             sha256 "${SHA}"
 
             url "${URL}"
-
-            name "Wren Swift"
-            desc "Swift GUI for signal-cli"
-            homepage "https://github.com/ada-h00k/wren"
+            name "Wren"
+            desc "Native macOS GUI for signal-cli with encrypted local chat history"
+            homepage "https://github.com/ada-h00k/Wren"
 
             depends_on arch: :arm64
+            depends_on macos: ">= :sonoma"
 
-            app "wren-swift.app"
+            app "Wren.app"
           end
           EOF
 
@@ -96,5 +100,5 @@ jobs:
             "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add Casks/wren-swift.rb
-          git commit -m "Update wren-swift to ${{ steps.release.outputs.tag }}"
+          git commit -m "Update Wren to ${{ steps.release.outputs.tag }}"
           git push
