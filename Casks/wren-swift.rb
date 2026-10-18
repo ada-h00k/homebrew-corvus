@@ -1,8 +1,8 @@
 cask "wren-swift" do
-  version "build-7b2b620aa5e04aa609f549c203ebf50479dc2049"
-  sha256 "c990b877a4a94d1e9d51c49a83e96b5825d7a4d72a88f619536f099b4a0c5e6f"
+  version "build-7747316c51b2a337b585b5322a09a729e4ca8689"
+  sha256 "edce9ec70e99dc03e6d6070b08c29df9d30a496595f7e7775709cc0ce4440944"
 
-  url "https://github.com/ada-h00k/Wren/releases/download/build-7b2b620aa5e04aa609f549c203ebf50479dc2049/wren-macos-arm64.zip"
+  url "https://github.com/ada-h00k/Wren/releases/download/build-7747316c51b2a337b585b5322a09a729e4ca8689/wren-macos-arm64.zip"
   name "Wren"
   desc "Native macOS GUI for signal-cli with encrypted local chat history"
   homepage "https://github.com/ada-h00k/Wren"
