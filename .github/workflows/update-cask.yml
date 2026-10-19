@@ -1,104 +1,89 @@
-name: Update Wren Cask
+name: Update Homebrew Casks
 
 on:
-  schedule:
-    - cron: "17 */6 * * *"
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: update-casks
+  cancel-in-progress: false
 
 jobs:
-  update:
+  update-casks:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout tap
+      - name: Tap-Repository auschecken
         uses: actions/checkout@v4
+        with:
+          repository: ada-h00k/homebrew-corvus
+          token: ${{ secrets.CASKS_TOKEN }}
 
-      - name: Get latest release
+      - name: Neuestes Release ermitteln
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
           set -euo pipefail
+          TAG="$(gh api repos/ada-h00k/corvus/releases/latest --jq .tag_name)"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "Neuestes Release: ${TAG}"
 
-          RELEASE="$(gh api repos/ada-h00k/Wren/releases/latest)"
-          TAG="$(jq -r '.tag_name' <<< "$RELEASE")"
-          URL="$(jq -r '
-            .assets[]
-            | select(.name == "wren-macos-arm64.zip")
-            | .browser_download_url
-          ' <<< "$RELEASE")"
-
-          if [[ -z "$TAG" || "$TAG" == "null" ]]; then
-            echo "::error::No latest release tag found"
-            exit 1
-          fi
-
-          if [[ -z "$URL" || "$URL" == "null" ]]; then
-            echo "::error::macOS ARM64 asset not found"
-            exit 1
-          fi
-
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
-
-      - name: Download and verify checksum
-        id: checksum
+      - name: macOS-Assets herunterladen und SHA256 berechnen
+        id: sha
         env:
-          DOWNLOAD_URL: ${{ steps.release.outputs.url }}
-        shell: bash
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          TMP="$(mktemp -d)"
+          gh release download "${{ steps.release.outputs.tag }}" \
+            --repo ada-h00k/corvus \
+            --dir "$TMP" \
+            --pattern 'corvus-macos-arm64.zip' \
+            --pattern 'corvus-qt-macos-arm64.zip'
+          echo "swift=$(sha256sum "$TMP/corvus-macos-arm64.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "qt=$(sha256sum "$TMP/corvus-qt-macos-arm64.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-          curl --fail --location --silent --show-error \
-            "$DOWNLOAD_URL" -o "$RUNNER_TEMP/wren.zip"
-
-          SHA="$(shasum -a 256 "$RUNNER_TEMP/wren.zip" | awk '{print $1}')"
-          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
-
-      - name: Update Cask
-        env:
-          TAG: ${{ steps.release.outputs.tag }}
-          URL: ${{ steps.release.outputs.url }}
-          SHA: ${{ steps.checksum.outputs.sha }}
-        shell: bash
+      - name: Cask-Dateien aktualisieren
         run: |
           set -euo pipefail
+          TAG="${{ steps.release.outputs.tag }}"
+          sed -i "s|^  version .*|  version \"${TAG}\"|" \
+            Casks/corvus-qt.rb Casks/corvus-swift.rb
+          sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.qt }}\"|" \
+            Casks/corvus-qt.rb
+          sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.swift }}\"|" \
+            Casks/corvus-swift.rb
 
-          cat > Casks/wren-swift.rb <<EOF
-          cask "wren-swift" do
-            version "${TAG}"
-            sha256 "${SHA}"
-
-            url "${URL}"
-            name "Wren"
-            desc "Native macOS GUI for signal-cli with encrypted local chat history"
-            homepage "https://github.com/ada-h00k/Wren"
-
-            depends_on arch: :arm64
-            depends_on macos: ">= :sonoma"
-
-            app "Wren.app"
-          end
-          EOF
-
-      - name: Commit changes if needed
-        shell: bash
+      - name: Ergebnis verifizieren
         run: |
           set -euo pipefail
+          TAG="${{ steps.release.outputs.tag }}"
+          for f in Casks/corvus-qt.rb Casks/corvus-swift.rb; do
+            grep -F "version \"${TAG}\"" "$f" > /dev/null \
+              || { echo "FEHLER: version in $f nicht gesetzt"; exit 1; }
+            ruby -c "$f" > /dev/null \
+              || { echo "FEHLER: Syntaxfehler in $f"; exit 1; }
+            echo "OK: $f"
+          done
+          echo "### Aktualisierte Casks (${TAG})" >> "$GITHUB_STEP_SUMMARY"
+          echo '```ruby' >> "$GITHUB_STEP_SUMMARY"
+          cat Casks/corvus-qt.rb Casks/corvus-swift.rb >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-          if git diff --quiet -- Casks/wren-swift.rb; then
-            echo "Cask is already up to date"
+      - name: Committen und pushen
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.release.outputs.tag }}"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/corvus-qt.rb Casks/corvus-swift.rb
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen – Casks sind bereits auf ${TAG}."
             exit 0
           fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email \
-            "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add Casks/wren-swift.rb
-          git commit -m "Update Wren to ${{ steps.release.outputs.tag }}"
+          git commit -m "chore: update casks to ${TAG}"
           git push
