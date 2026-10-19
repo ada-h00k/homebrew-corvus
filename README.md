@@ -25,7 +25,7 @@ brew install --cask corvus-swift
 Alternatively, install it directly without adding the tap separately:
 
 ```bash
-brew install --cask ada-h00k/corvus/cCorvus-swift
+brew install --cask ada-h00k/corvus/Corvus-swift
 ```
 
 ## Updating
