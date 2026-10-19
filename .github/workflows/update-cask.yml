@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
 
 permissions:
   contents: read
@@ -16,13 +18,13 @@ jobs:
   update-casks:
     runs-on: ubuntu-latest
     steps:
-      - name: Tap-Repository auschecken
+      - name: Check out tap repository
         uses: actions/checkout@v4
         with:
           repository: ada-h00k/homebrew-corvus
           token: ${{ secrets.CASKS_TOKEN }}
 
-      - name: Neuestes Release ermitteln
+      - name: Determine the latest release
         id: release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -30,9 +32,9 @@ jobs:
           set -euo pipefail
           TAG="$(gh api repos/ada-h00k/corvus/releases/latest --jq .tag_name)"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "Neuestes Release: ${TAG}"
+          echo "Latest release: ${TAG}"
 
-      - name: macOS-Assets herunterladen und SHA256 berechnen
+      - name: Download macOS assets and compute SHA256
         id: sha
         env:
           GH_TOKEN: ${{ github.token }}
@@ -47,7 +49,7 @@ jobs:
           echo "swift=$(sha256sum "$TMP/corvus-macos-arm64.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           echo "qt=$(sha256sum "$TMP/corvus-qt-macos-arm64.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - name: Cask-Dateien aktualisieren
+      - name: Update cask files
         run: |
           set -euo pipefail
           TAG="${{ steps.release.outputs.tag }}"
@@ -58,23 +60,23 @@ jobs:
           sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.swift }}\"|" \
             Casks/corvus-swift.rb
 
-      - name: Ergebnis verifizieren
+      - name: Verify result
         run: |
           set -euo pipefail
           TAG="${{ steps.release.outputs.tag }}"
           for f in Casks/corvus-qt.rb Casks/corvus-swift.rb; do
             grep -F "version \"${TAG}\"" "$f" > /dev/null \
-              || { echo "FEHLER: version in $f nicht gesetzt"; exit 1; }
+              || { echo "ERROR: version not set in $f"; exit 1; }
             ruby -c "$f" > /dev/null \
-              || { echo "FEHLER: Syntaxfehler in $f"; exit 1; }
+              || { echo "ERROR: syntax error in $f"; exit 1; }
             echo "OK: $f"
           done
-          echo "### Aktualisierte Casks (${TAG})" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Updated casks (${TAG})" >> "$GITHUB_STEP_SUMMARY"
           echo '```ruby' >> "$GITHUB_STEP_SUMMARY"
           cat Casks/corvus-qt.rb Casks/corvus-swift.rb >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Committen und pushen
+      - name: Commit and push
         run: |
           set -euo pipefail
           TAG="${{ steps.release.outputs.tag }}"
@@ -82,7 +84,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Casks/corvus-qt.rb Casks/corvus-swift.rb
           if git diff --cached --quiet; then
-            echo "Keine Änderungen – Casks sind bereits auf ${TAG}."
+            echo "No changes - casks are already at ${TAG}."
             exit 0
           fi
           git commit -m "chore: update casks to ${TAG}"
