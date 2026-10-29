@@ -20,12 +20,14 @@ Install Corvus:
 
 ```bash
 brew install --cask corvus-swift
+brew install --cask corvus-qt
 ```
 
 Alternatively, install it directly without adding the tap separately:
 
 ```bash
 brew install --cask ada-h00k/corvus/Corvus-swift
+brew install --cask ada-h00k/corvus/Corvus-qt
 ```
 
 ## Updating
@@ -35,6 +37,7 @@ Update Homebrew's metadata and upgrade Corvus:
 ```bash
 brew update
 brew upgrade --cask corvus-swift
+brew upgrade --cask corvus-qt
 ```
 
 The tap is designed to track the latest macOS release published in the [Corvus repository](https://github.com/ada-h00k/Corvus/releases).
@@ -49,6 +52,7 @@ Uninstall Corvus:
 
 ```bash
 brew uninstall --cask corvus-swift
+brew uninstall --cask corvus-qt
 ```
 
 Optionally, remove the tap:
@@ -69,6 +73,7 @@ Update Homebrew and verify that the tap is installed:
 brew update
 brew tap
 brew info --cask ada-h00k/Corvus/Corvus-swift
+brew info --cask ada-h00k/Corvus/Corvus-qt
 ```
 
 ### The installed version is outdated
@@ -78,6 +83,7 @@ Refresh the tap and upgrade Corvus:
 ```bash
 brew update
 brew upgrade --cask corvus-swift
+brew upgrade --cask corvus-qt
 ```
 
 If no newer version is available, check the [Corvus releases](https://github.com/ada-h00k/Corvus/releases) and the tap's [GitHub Actions](https://github.com/ada-h00k/homebrew-Corvus/actions) for update failures.
