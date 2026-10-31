@@ -1,6 +1,6 @@
 cask "corvus-swift" do
-  version "build-3093d132bfeff7612a1918f12dd5edd0edec4946"
-  sha256 "acbf3ea73584ec0687741692a04854862cfda3377cf98c899181c53464744460"
+  version "build-b89762cfbf670a7472f0a922eee38960975fa705"
+  sha256 "1ecf97d5c9313c6d8611e3b68b28f2bb1ae854e7d6cd42ae790fef51841737d2"
 
   url "https://github.com/ada-h00k/corvus/releases/latest/download/corvus-macos-arm64.zip"
   name "Corvus"
