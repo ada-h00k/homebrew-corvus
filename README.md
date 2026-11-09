@@ -43,14 +43,6 @@ brew install --formula ada-h00k/corvus/corvus-cli
 
 The `corvus-cli` Formula installs the published ARM64 executable. The two GUI Formulae keep the upstream `.app` bundles inside Homebrew's Cellar and provide the `corvus-swift` and `corvus-qt` terminal launchers. They do not place the apps in `/Applications`; use the Casks above for the standard macOS app installation and Finder/Launchpad integration. Choose either the Cask or Formula variant for a package rather than installing both variants side by side.
 
-Alternatively, install the Casks directly without adding the tap separately:
-
-```bash
-brew install --cask ada-h00k/corvus/corvus-swift
-brew install --cask ada-h00k/corvus/corvus-qt
-brew install --cask ada-h00k/corvus/corvus-cli
-```
-
 ## Updating
 
 Update Homebrew's metadata and upgrade packages installed as Casks:
