@@ -10,17 +10,17 @@ class CorvusSwift < Formula
   depends_on macos: :sonoma
 
   def install
-    prefix.install "Corvus.app"
+    libexec.install "Corvus.app"
 
     (bin/"corvus-swift").write <<~SH
       #!/bin/sh
-      exec /usr/bin/open "#{prefix}/Corvus.app" "$@"
+      exec /usr/bin/open "#{libexec}/Corvus.app" "$@"
     SH
     chmod 0555, bin/"corvus-swift"
   end
 
   test do
-    assert_predicate prefix/"Corvus.app/Contents/Info.plist", :exist?
+    assert_predicate libexec/"Corvus.app/Contents/Info.plist", :exist?
     assert_predicate bin/"corvus-swift", :executable?
   end
 end

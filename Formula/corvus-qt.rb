@@ -9,17 +9,17 @@ class CorvusQt < Formula
   depends_on arch: :arm64
 
   def install
-    prefix.install "corvus.app"
+    libexec.install "corvus.app"
 
     (bin/"corvus-qt").write <<~SH
       #!/bin/sh
-      exec /usr/bin/open -a "#{prefix}/corvus.app" "$@"
+      exec /usr/bin/open -a "#{libexec}/corvus.app" "$@"
     SH
     chmod 0555, bin/"corvus-qt"
   end
 
   test do
-    assert_predicate prefix/"corvus.app/Contents/Info.plist", :exist?
+    assert_predicate libexec/"corvus.app/Contents/Info.plist", :exist?
     assert_predicate bin/"corvus-qt", :executable?
   end
 end
