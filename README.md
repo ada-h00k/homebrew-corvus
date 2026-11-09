@@ -19,14 +19,14 @@ brew tap ada-h00k/corvus
 Install the native macOS apps with the recommended Casks:
 
 ```bash
-brew install --cask corvus-swift
-brew install --cask corvus-qt
+brew install --cask ada-h00k/corvus/corvus-swift
+brew install --cask ada-h00k/corvus/corvus-qt
 ```
 
 Install the Rust Signal backend:
 
 ```bash
-brew install --cask corvus-cli
+brew install --cask ada-h00k/corvus/corvus-cli
 ```
 
 In Corvus, select the installed backend under **Settings → Advanced → Choose…**. Homebrew makes it available as `corvus-cli` on your PATH (usually `/opt/homebrew/bin/corvus-cli`).
@@ -36,9 +36,9 @@ In Corvus, select the installed backend under **Settings → Advanced → Choose
 The tap also provides Formulae for all three packages:
 
 ```bash
-brew install --formula corvus-swift
-brew install --formula corvus-qt
-brew install --formula corvus-cli
+brew install --formula ada-h00k/corvus/corvus-swift
+brew install --formula ada-h00k/corvus/corvus-qt
+brew install --formula ada-h00k/corvus/corvus-cli
 ```
 
 The `corvus-cli` Formula installs the published ARM64 executable. The two GUI Formulae keep the upstream `.app` bundles inside Homebrew's Cellar and provide the `corvus-swift` and `corvus-qt` terminal launchers. They do not place the apps in `/Applications`; use the Casks above for the standard macOS app installation and Finder/Launchpad integration. Choose either the Cask or Formula variant for a package rather than installing both variants side by side.
@@ -57,18 +57,18 @@ Update Homebrew's metadata and upgrade packages installed as Casks:
 
 ```bash
 brew update
-brew upgrade --cask corvus-swift
-brew upgrade --cask corvus-qt
-brew upgrade --cask corvus-cli
+brew upgrade --cask ada-h00k/corvus/corvus-swift
+brew upgrade --cask ada-h00k/corvus/corvus-qt
+brew upgrade --cask ada-h00k/corvus/corvus-cli
 ```
 
 For packages installed as Formulae:
 
 ```bash
 brew update
-brew upgrade --formula corvus-swift
-brew upgrade --formula corvus-qt
-brew upgrade --formula corvus-cli
+brew upgrade --formula ada-h00k/corvus/corvus-swift
+brew upgrade --formula ada-h00k/corvus/corvus-qt
+brew upgrade --formula ada-h00k/corvus/corvus-cli
 ```
 
 The tap tracks the latest macOS releases published in the [Corvus repository](https://github.com/ada-h00k/Corvus/releases) and the [corvus-cli repository](https://github.com/ada-h00k/corvus-cli/releases). The automated update workflow runs every six hours. It checks both repositories independently, downloads their macOS assets, computes SHA-256 checksums, and updates all three Casks and all three Formulae. Updating a package definition does not automatically update an already installed copy; run the relevant upgrade commands above to install the latest versions.
