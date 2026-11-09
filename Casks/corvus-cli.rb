@@ -1,6 +1,6 @@
 cask "corvus-cli" do
-  version "commit-2ab8c863029ae9351f6d6ca360e77a34e8e3a3dc"
-  sha256 "a927b50683224b2bff9bef8579386ff5335dd2ca27947e81e1f91ce0468915c9"
+  version "commit-41dd0d06a60fedfbb363543d33d079c25412b8ba"
+  sha256 "95950525c5e0eaf3437521d04b647ec748b817199d429ca53bb5bba18ffda8ab"
 
   url "https://github.com/ada-h00k/corvus-cli/releases/latest/download/corvus-cli-macos-aarch64"
   name "corvus-cli"

@@ -1,4 +1,4 @@
-name: Update Homebrew Casks
+name: Update Homebrew Casks and Formulae
 
 on:
   release:
@@ -11,11 +11,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: update-casks
+  group: update-homebrew-packages
   cancel-in-progress: false
 
 jobs:
-  update-casks:
+  update-packages:
     runs-on: ubuntu-latest
     steps:
       - name: Check out tap repository
@@ -57,51 +57,72 @@ jobs:
           echo "qt=$(sha256sum "$TMP/corvus-qt-macos-arm64.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
           echo "cli=$(sha256sum "$TMP/corvus-cli-macos-aarch64" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - name: Update cask files
+      - name: Update Cask and Formula files
         run: |
           set -euo pipefail
           TAG="${{ steps.release.outputs.tag }}"
           CLI_TAG="${{ steps.release.outputs.cli_tag }}"
+
           sed -i "s|^  version .*|  version \"${TAG}\"|" \
-            Casks/corvus-qt.rb Casks/corvus-swift.rb
+            Casks/corvus-qt.rb Casks/corvus-swift.rb \
+            Formula/corvus-qt.rb Formula/corvus-swift.rb
           sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.qt }}\"|" \
-            Casks/corvus-qt.rb
+            Casks/corvus-qt.rb Formula/corvus-qt.rb
           sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.swift }}\"|" \
-            Casks/corvus-swift.rb
-          sed -i "s|^  version .*|  version \"${CLI_TAG}\"|" Casks/corvus-cli.rb
-          sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.cli }}\"|" Casks/corvus-cli.rb
+            Casks/corvus-swift.rb Formula/corvus-swift.rb
+
+          sed -i "s|^  version .*|  version \"${CLI_TAG}\"|" \
+            Casks/corvus-cli.rb Formula/corvus-cli.rb
+          sed -i "s|^  sha256 .*|  sha256 \"${{ steps.sha.outputs.cli }}\"|" \
+            Casks/corvus-cli.rb Formula/corvus-cli.rb
+
+          sed -i "s|^  url .*|  url \"https://github.com/ada-h00k/Corvus/releases/download/${TAG}/corvus-macos-arm64.zip\"|" \
+            Formula/corvus-swift.rb
+          sed -i "s|^  url .*|  url \"https://github.com/ada-h00k/Corvus/releases/download/${TAG}/corvus-qt-macos-arm64.zip\"|" \
+            Formula/corvus-qt.rb
+          sed -i "s|^  url .*|  url \"https://github.com/ada-h00k/corvus-cli/releases/download/${CLI_TAG}/corvus-cli-macos-aarch64\"|" \
+            Formula/corvus-cli.rb
 
       - name: Verify result
         run: |
           set -euo pipefail
           TAG="${{ steps.release.outputs.tag }}"
           CLI_TAG="${{ steps.release.outputs.cli_tag }}"
-          for f in Casks/corvus-qt.rb Casks/corvus-swift.rb; do
+
+          for f in Casks/corvus-qt.rb Casks/corvus-swift.rb \
+                   Formula/corvus-qt.rb Formula/corvus-swift.rb; do
             grep -F "version \"${TAG}\"" "$f" > /dev/null \
               || { echo "ERROR: version not set in $f"; exit 1; }
             ruby -c "$f" > /dev/null \
               || { echo "ERROR: syntax error in $f"; exit 1; }
             echo "OK: $f"
           done
-          grep -F "version \"${CLI_TAG}\"" Casks/corvus-cli.rb > /dev/null \
-            || { echo "ERROR: corvus-cli version not set"; exit 1; }
-          ruby -c Casks/corvus-cli.rb > /dev/null \
-            || { echo "ERROR: syntax error in Casks/corvus-cli.rb"; exit 1; }
-          echo "OK: Casks/corvus-cli.rb"
-          echo "Updated casks: Corvus ${TAG}; corvus-cli ${CLI_TAG}" >> "$GITHUB_STEP_SUMMARY"
-          cat Casks/corvus-qt.rb Casks/corvus-swift.rb Casks/corvus-cli.rb >> "$GITHUB_STEP_SUMMARY"
+
+          for f in Casks/corvus-cli.rb Formula/corvus-cli.rb; do
+            grep -F "version \"${CLI_TAG}\"" "$f" > /dev/null \
+              || { echo "ERROR: version not set in $f"; exit 1; }
+            ruby -c "$f" > /dev/null \
+              || { echo "ERROR: syntax error in $f"; exit 1; }
+            echo "OK: $f"
+          done
+
+          echo "Updated Casks and Formulae: Corvus ${TAG}; corvus-cli ${CLI_TAG}" >> "$GITHUB_STEP_SUMMARY"
+          cat Casks/corvus-qt.rb Casks/corvus-swift.rb Casks/corvus-cli.rb \
+              Formula/corvus-qt.rb Formula/corvus-swift.rb Formula/corvus-cli.rb \
+              >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit and push
         run: |
           set -euo pipefail
           TAG="${{ steps.release.outputs.tag }}"
           CLI_TAG="${{ steps.release.outputs.cli_tag }}"
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Casks/corvus-qt.rb Casks/corvus-swift.rb Casks/corvus-cli.rb
+          git add Casks/corvus-qt.rb Casks/corvus-swift.rb Casks/corvus-cli.rb \
+                  Formula/corvus-qt.rb Formula/corvus-swift.rb Formula/corvus-cli.rb
           if git diff --cached --quiet; then
-            echo "No changes - casks are already current."
+            echo "No changes - Casks and Formulae are already current."
             exit 0
           fi
-          git commit -m "chore: update casks (Corvus ${TAG}, corvus-cli ${CLI_TAG})"
+          git commit -m "chore: update Homebrew packages (Corvus ${TAG}, corvus-cli ${CLI_TAG})"
           git push
