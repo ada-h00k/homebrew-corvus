@@ -7,6 +7,7 @@ class CorvusQt < Formula
   license "AGPL-3.0-only"
 
   depends_on arch: :arm64
+  depends_on :macos
 
   def install
     libexec.install "corvus.app"

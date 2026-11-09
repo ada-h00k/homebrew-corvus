@@ -7,6 +7,7 @@ class CorvusCli < Formula
   license "AGPL-3.0-only"
 
   depends_on arch: :arm64
+  depends_on :macos
 
   def install
     bin.install "corvus-cli-macos-aarch64" => "corvus-cli"
