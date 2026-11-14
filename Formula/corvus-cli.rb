@@ -1,9 +1,9 @@
 class CorvusCli < Formula
   desc "Rust-based Signal backend compatible with signal-cli"
   homepage "https://github.com/ada-h00k/corvus-cli"
-  url "https://github.com/ada-h00k/corvus-cli/releases/download/commit-2591e90021d67698bfe25c5835ecbc47f7fd6910/corvus-cli-macos-aarch64"
-  version "commit-2591e90021d67698bfe25c5835ecbc47f7fd6910"
-  sha256 "602716233e8435a2d58acc9ef35d7f90ccece289609c8c7bc2425e8a24760a31"
+  url "https://github.com/ada-h00k/corvus-cli/releases/download/v1.0.0/corvus-cli-macos-aarch64"
+  version "v1.0.0"
+  sha256 "56026de4dc5ef183a8646ba0152dd0062e7832fc36da4f11ae5d4d08e4e73ec4"
   license "AGPL-3.0-only"
 
   depends_on arch: :arm64
