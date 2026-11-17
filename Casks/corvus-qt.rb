@@ -1,6 +1,6 @@
 cask "corvus-qt" do
-  version "v1.1.1"
-  sha256 "0d9d16c17a5ca15b59e306288c2239c7319f015a0779933c9dab89be0aa11877"
+  version "v1.2.0"
+  sha256 "697d95241c1a81c342ff100e537f8121b25e2078b9d01ca25f850a8ff150fdef"
 
   url "https://github.com/ada-h00k/corvus/releases/latest/download/corvus-qt-macos-arm64.zip"
   name "Corvus Qt"
