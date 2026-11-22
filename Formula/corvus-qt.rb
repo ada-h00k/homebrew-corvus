@@ -1,9 +1,9 @@
 class CorvusQt < Formula
   desc "Terminal launcher for the Qt-based Corvus macOS app"
   homepage "https://github.com/ada-h00k/Corvus"
-  url "https://github.com/ada-h00k/Corvus/releases/download/v1.5.2/corvus-qt-macos-arm64.zip"
-  version "v1.5.2"
-  sha256 "d62178fbd9295c4ca0875058f3c36104c1d440d9ab5ea9f0168814b7da6bbf14"
+  url "https://github.com/ada-h00k/Corvus/releases/download/v1.6.0/corvus-qt-macos-arm64.zip"
+  version "v1.6.0"
+  sha256 "43d529ac6fc5a47d0cb19a18a367f22b78b42ca0ecdf23752d69721182a6365f"
   license "AGPL-3.0-only"
 
   depends_on arch: :arm64
