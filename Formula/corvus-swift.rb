@@ -1,9 +1,9 @@
 class CorvusSwift < Formula
   desc "Terminal launcher for the native Corvus Swift macOS app"
   homepage "https://github.com/ada-h00k/Corvus"
-  url "https://github.com/ada-h00k/Corvus/releases/download/v1.8.4/corvus-macos-arm64.zip"
-  version "v1.8.4"
-  sha256 "cb328b92dbae5f9663294de781fa449a671cd4c970a434f8de55eca368052840"
+  url "https://github.com/ada-h00k/Corvus/releases/download/v1.8.5/corvus-macos-arm64.zip"
+  version "v1.8.5"
+  sha256 "38c76aaeb77c463454c53614d4c2b8d75f255a7e9353264e786ec67807262723"
   license "AGPL-3.0-only"
 
   depends_on arch: :arm64
